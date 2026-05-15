@@ -1,0 +1,82 @@
+{
+  "hash": "baa5ff9c",
+  "configHash": "165bc532",
+  "lockfileHash": "85bbb931",
+  "browserHash": "06038de3",
+  "optimized": {
+    "@angular/common": {
+      "src": "../../../../../node_modules/@angular/common/fesm2022/common.mjs",
+      "file": "@angular_common.js",
+      "fileHash": "fd2f98c5",
+      "needsInterop": false
+    },
+    "@angular/core": {
+      "src": "../../../../../node_modules/@angular/core/fesm2022/core.mjs",
+      "file": "@angular_core.js",
+      "fileHash": "06a7b162",
+      "needsInterop": false
+    },
+    "@angular/fire/app": {
+      "src": "../../../../../node_modules/@angular/fire/fesm2022/angular-fire-app.mjs",
+      "file": "@angular_fire_app.js",
+      "fileHash": "16e2ebf6",
+      "needsInterop": false
+    },
+    "@angular/fire/auth": {
+      "src": "../../../../../node_modules/@angular/fire/fesm2022/angular-fire-auth.mjs",
+      "file": "@angular_fire_auth.js",
+      "fileHash": "abc09723",
+      "needsInterop": false
+    },
+    "@angular/fire/firestore": {
+      "src": "../../../../../node_modules/@angular/fire/fesm2022/angular-fire-firestore.mjs",
+      "file": "@angular_fire_firestore.js",
+      "fileHash": "7c295d17",
+      "needsInterop": false
+    },
+    "@angular/forms": {
+      "src": "../../../../../node_modules/@angular/forms/fesm2022/forms.mjs",
+      "file": "@angular_forms.js",
+      "fileHash": "5f2f2524",
+      "needsInterop": false
+    },
+    "@angular/platform-browser": {
+      "src": "../../../../../node_modules/@angular/platform-browser/fesm2022/platform-browser.mjs",
+      "file": "@angular_platform-browser.js",
+      "fileHash": "7681bef8",
+      "needsInterop": false
+    },
+    "@angular/router": {
+      "src": "../../../../../node_modules/@angular/router/fesm2022/router.mjs",
+      "file": "@angular_router.js",
+      "fileHash": "82a51e99",
+      "needsInterop": false
+    },
+    "rxjs": {
+      "src": "../../../../../node_modules/rxjs/dist/esm5/index.js",
+      "file": "rxjs.js",
+      "fileHash": "a318ffb9",
+      "needsInterop": false
+    }
+  },
+  "chunks": {
+    "chunk-22XQAUPM": {
+      "file": "chunk-22XQAUPM.js"
+    },
+    "chunk-7A7N3CZ7": {
+      "file": "chunk-7A7N3CZ7.js"
+    },
+    "chunk-5STQLSD2": {
+      "file": "chunk-5STQLSD2.js"
+    },
+    "chunk-Y3VPRDS6": {
+      "file": "chunk-Y3VPRDS6.js"
+    },
+    "chunk-P2FBHHHS": {
+      "file": "chunk-P2FBHHHS.js"
+    },
+    "chunk-6BZHIMXI": {
+      "file": "chunk-6BZHIMXI.js"
+    }
+  }
+}
