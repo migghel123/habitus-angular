@@ -27,7 +27,6 @@ export class HabitusService {
     return snap.docs.map(d => ({ id: d.id, ...d.data() } as Activity));
   }
 
-  /** Seed initial catalog data if collections are empty */
   async seedCatalogs(): Promise<void> {
     const foodSnap = await getDocs(collection(this.fs, 'foods'));
     if (foodSnap.empty) {
@@ -62,16 +61,16 @@ export class HabitusService {
     if (actSnap.empty) {
       const batch = writeBatch(this.fs);
       const acts: Omit<Activity, 'id'>[] = [
-        { name: 'Caminar suave',              caloriesPerMinute: 4  },
-        { name: 'Caminar rápido',             caloriesPerMinute: 6  },
-        { name: 'Correr ligero',              caloriesPerMinute: 9  },
-        { name: 'Correr intenso',             caloriesPerMinute: 12 },
-        { name: 'Bicicleta',                  caloriesPerMinute: 8  },
-        { name: 'Natación',                   caloriesPerMinute: 9  },
-        { name: 'Subir escaleras',            caloriesPerMinute: 8  },
-        { name: 'Yoga',                       caloriesPerMinute: 3  },
-        { name: 'Entrenamiento de fuerza',    caloriesPerMinute: 7  },
-        { name: 'Saltar la cuerda',           caloriesPerMinute: 10 },
+        { name: 'Caminar suave',           caloriesPerMinute: 4  },
+        { name: 'Caminar rápido',          caloriesPerMinute: 6  },
+        { name: 'Correr ligero',           caloriesPerMinute: 9  },
+        { name: 'Correr intenso',          caloriesPerMinute: 12 },
+        { name: 'Bicicleta',               caloriesPerMinute: 8  },
+        { name: 'Natación',                caloriesPerMinute: 9  },
+        { name: 'Subir escaleras',         caloriesPerMinute: 8  },
+        { name: 'Yoga',                    caloriesPerMinute: 3  },
+        { name: 'Entrenamiento de fuerza', caloriesPerMinute: 7  },
+        { name: 'Saltar la cuerda',        caloriesPerMinute: 10 },
       ];
       acts.forEach(a => batch.set(doc(collection(this.fs, 'activities')), a));
       await batch.commit();
@@ -82,21 +81,14 @@ export class HabitusService {
 
   async saveRecord(record: DailyRecord): Promise<string> {
     const batch = writeBatch(this.fs);
-
-    // Energy balance
     const ebRef = doc(collection(this.fs, 'energy_balance'));
     batch.set(ebRef, { ...record.energyBalance, createdAt: serverTimestamp() });
-
-    // Food logs
     for (const fl of record.foodLogs) {
       batch.set(doc(collection(this.fs, 'food_logs')), fl);
     }
-
-    // Activity logs
     for (const al of record.activityLogs) {
       batch.set(doc(collection(this.fs, 'activity_logs')), al);
     }
-
     await batch.commit();
     return ebRef.id;
   }
@@ -141,7 +133,8 @@ export class HabitusService {
   }
 
   async updateEnergyBalance(id: string, data: Partial<EnergyBalance>): Promise<void> {
-    await updateDoc(doc(this.fs, 'energy_balance', id), data as any);  }
+    await updateDoc(doc(this.fs, 'energy_balance', id), data as any);
+  }
 
   // ── CÁLCULOS ────────────────────────────────────────────
 
@@ -156,49 +149,69 @@ export class HabitusService {
     return Math.round((weightKg / (h * h)) * 100) / 100;
   }
 
-  // ── IA NUTRICIÓN ────────────────────────────────────────
+  // ── IA NUTRICIÓN — Claude API ────────────────────────────
 
   async getAiAdvice(params: {
-    bmi: number; caloriesIn: number; caloriesOut: number; netBalance: number;
-    gender: string; age: number; foodsSummary: string; activitiesSummary: string;
+    bmi: number;
+    caloriesIn: number;
+    caloriesOut: number;
+    netBalance: number;
+    gender: string;
+    age: number;
+    foodsSummary: string;
+    activitiesSummary: string;
   }): Promise<string | null> {
+
     const prompt =
-      `Eres un nutriologo clinico experto. Analiza este registro diario y responde en español ` +
+      `Eres un nutriólogo clínico experto. Analiza este registro diario y responde en español ` +
       `siguiendo exactamente esta estructura:\n\n` +
-      `1) Primera linea con uno de estos prefijos:\n` +
-      `   - 'Dia equilibrado:' si el balance es razonable.\n` +
-      `   - 'Exceso de calorias:' si el balance neto supera 300 kcal.\n` +
-      `   - 'Poca actividad fisica:' si casi no hay actividad.\n` +
-      `   - 'Riesgo alto:' si hay muchas calorias y muy poca actividad.\n` +
-      `2) 2 a 3 lineas de explicacion breve.\n` +
-      `3) 'Recomendaciones de alimentos:' con 2-3 puntos con guion.\n` +
-      `4) 'Recomendaciones de actividad fisica:' con 2-3 puntos con guion.\n\n` +
-      `Solo recomendaciones generales, maximo 200 palabras.\n\n` +
-      `Datos del dia:\n` +
+      `1) Primera línea con uno de estos prefijos:\n` +
+      `   - "Día equilibrado:" si el balance es razonable.\n` +
+      `   - "Exceso de calorías:" si el balance neto supera 300 kcal.\n` +
+      `   - "Poca actividad física:" si casi no hay actividad.\n` +
+      `   - "Riesgo alto:" si hay muchas calorías y muy poca actividad.\n` +
+      `2) 2 a 3 líneas de explicación breve.\n` +
+      `3) "Recomendaciones de alimentos:" con 2-3 puntos con guión.\n` +
+      `4) "Recomendaciones de actividad física:" con 2-3 puntos con guión.\n\n` +
+      `Solo recomendaciones generales, máximo 200 palabras.\n\n` +
+      `Datos del día:\n` +
       `- Sexo: ${params.gender}\n` +
       `- Edad: ${params.age} años\n` +
       `- IMC: ${params.bmi}\n` +
-      `- Calorias consumidas: ${params.caloriesIn}\n` +
-      `- Calorias quemadas: ${params.caloriesOut}\n` +
+      `- Calorías consumidas: ${params.caloriesIn}\n` +
+      `- Calorías quemadas: ${params.caloriesOut}\n` +
       `- Balance neto: ${params.netBalance} kcal\n` +
       `- Alimentos: ${params.foodsSummary}\n` +
       `- Actividades: ${params.activitiesSummary}`;
 
     try {
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash-lite:generateContent?key=${environment.geminiApiKey}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            contents: [{ parts: [{ text: prompt }] }],
-            generationConfig: { maxOutputTokens: 400, temperature: 0.4 }
-          })
-        }
-      );
-      const data = await res.json();
-      return data?.candidates?.[0]?.content?.parts?.[0]?.text?.trim() ?? null;
-    } catch {
+      const response = await fetch('https://api.anthropic.com/v1/messages', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'x-api-key': environment.claudeApiKey,
+          'anthropic-version': '2023-06-01',
+          'anthropic-dangerous-direct-browser-access': 'true'
+        },
+        body: JSON.stringify({
+          model: 'claude-haiku-4-5-20251001',
+          max_tokens: 500,
+          messages: [
+            { role: 'user', content: prompt }
+          ]
+        })
+      });
+
+      if (!response.ok) {
+        console.error('Claude API error:', response.status);
+        return null;
+      }
+
+      const data = await response.json();
+      return data?.content?.[0]?.text?.trim() ?? null;
+
+    } catch (err) {
+      console.error('Error llamando a Claude:', err);
       return null;
     }
   }

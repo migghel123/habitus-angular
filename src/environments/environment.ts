@@ -1,3 +1,4 @@
+// src/environments/environment.ts
 export const environment = {
   production: false,
   firebase: {
@@ -8,5 +9,5 @@ export const environment = {
     messagingSenderId: "665324189175",
     appId: "1:665324189175:web:f30a925b66aaaa5a7aeaf2"
   },
-  geminiApiKey: 'AIzaSyC7Z-z7_-vZuvbjqQGCmIzFrDqAISCTIt4'
+  claudeApiKey: 'aqui iria la api key'
 };
